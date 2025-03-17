@@ -19,17 +19,29 @@
               <a class="nav-link" href="{% url 'home' %}">خانه </a>
             </li>
             {% if user.is_authenticated %}
-                
+              <li class="nav-item">  
+                <b>{{ user.username }}</b>
+              </li> 
+              <li class="nav-item">
+                <form method="post" action="{% url 'logout' %}">
+                  {% csrf_token %}  
+                  <button type="submit" class="btn btn-danger">خروج</button></a>
+                </form>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#"><button class="btn btn-primary">برد های من </button></a>
+              </li>
+            {% else %}
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'register' %}">ثبت نام</a>
+                </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'login' %}">ورود</a>
+              </li>
+
             {% endif %}
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'register' %}">ثبت نام</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'login' %}">ورود</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">workspace</a>
-            </li>
+
+
 
           </ul>
         </div>
