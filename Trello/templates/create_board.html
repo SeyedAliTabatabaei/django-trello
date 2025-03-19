@@ -1,0 +1,11 @@
+{% extends 'core.html' %}
+
+{% block content %}
+  <h2>ساخت بورد جدید</h2>
+
+  <form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success">برد رو بساز</button>
+  </form>
+{% endblock %}

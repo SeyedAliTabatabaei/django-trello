@@ -29,7 +29,12 @@
                 </form>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#"><button class="btn btn-primary">برد های من </button></a>
+                <a href="{% url 'create_board' %}">
+                  <button class="btn btn-success">ساخت برد جدید</button>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'board_list' %}"><button class="btn btn-primary">برد های من </button></a>
               </li>
             {% else %}
               <li class="nav-item">

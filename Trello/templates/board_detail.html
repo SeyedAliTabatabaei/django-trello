@@ -1,0 +1,40 @@
+{% extends 'core.html' %}
+
+{% block content %}
+
+  <div class="container-fluid border">
+    <div class="row justify-content-center">
+        <div class="col-10 text-center border">
+          <h2>{{ board.name }}</h2>
+          <div class="container-fluid">
+            <div class="row justify-content-center">
+              {% for list in lists %}
+                <div class="col-3 text-center border">
+                 <b> {{ list.name }}</b>
+                    <div class="container">
+                      <div class="row justify-content-center">
+                        <div class="col-12 border">
+                          {% for task in list.tasks.all %}
+                            {{ task.name }} <br>
+                          {% endfor %}
+                          <a href="{% url 'add_task' list.id %}">اضافه کردن تسک جدید</a>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+    </div>
+  </div>
+  
+  <form method="POST" class="form-control">
+    {% csrf_token %}
+    {{ list_form.as_p }}
+    <button type="submit">ساخت لیست جدید</button>
+  </form>
+
+
+{% endblock %}
