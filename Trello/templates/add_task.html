@@ -1,11 +1,11 @@
 {% extends 'core.html' %}
 
 {% block content %}
-  <h2>Add Task to List: {{ list.name }}</h2>
+  <h2>اضافه کردن تسک به لیست: {{ list.name }}</h2>
 
   <form method="POST">
     {% csrf_token %}
     {{ task_form.as_p }}
-    <button type="submit">Create Task</button>
+    <button type="submit">ساخت تسک</button>
   </form>
 {% endblock %}

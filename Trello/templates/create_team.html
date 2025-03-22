@@ -1,0 +1,13 @@
+{% extends "core.html" %}
+{% block content %}
+    تیم های شما
+    {% for team in user_teams %}
+       <br> <a href="{% url 'create-board' team.id %}">{{ team.name }}</a> <br>
+    {% endfor %}
+    <h2>ساخت تیم جدید</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">ایجاد تیم</button>
+    </form>
+{% endblock %}

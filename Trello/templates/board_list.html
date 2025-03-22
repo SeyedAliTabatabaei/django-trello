@@ -8,7 +8,8 @@
         <li>{{ board.name }} - {{ board.description }}</li>
       </a>      
     {% empty %}
-      <li>No boards created yet.</li>
+      <li>شما هنوز بردی نساختید</li>
+      <a href="{% url 'create_team' %}">ایجاد برد جدید</a>
     {% endfor %}
   </ul>
 {% endblock %}

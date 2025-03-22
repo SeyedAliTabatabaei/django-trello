@@ -1,40 +1,83 @@
 {% extends 'core.html' %}
 
 {% block content %}
-
   <div class="container-fluid border">
     <div class="row justify-content-center">
-        <div class="col-10 text-center border">
-          <h2>{{ board.name }}</h2>
-          <div class="container-fluid">
-            <div class="row justify-content-center">
-              {% for list in lists %}
-                <div class="col-3 text-center border">
-                 <b> {{ list.name }}</b>
-                    <div class="container">
-                      <div class="row justify-content-center">
-                        <div class="col-12 border">
-                          {% for task in list.tasks.all %}
-                            {{ task.name }} <br>
-                          {% endfor %}
-                          <a href="{% url 'add_task' list.id %}">اضافه کردن تسک جدید</a>
-                        </div>
-                      </div>
+      <div class="col-10 text-center border">
+        <h2>{{ board.name }}</h2>
+        <div class="container-fluid">
+          <div class="row justify-content-center">
+            {% for list in lists %}
+              <div class="col-3 text-center border">
+                <b>{{ list.name }}</b>
+                <div class="container">
+                  <div class="row justify-content-center">
+                    <div class="col-12 border">
+                      {% for task in list.tasks.all %}
+                        <a href="javascript:void(0)" onclick="openTaskDetails({{ task.id }})">{{ task.name }}</a><br>
+                      {% endfor %}
+                      <a href="{% url 'add_task' list.id %}">اضافه کردن تسک جدید</a>
                     </div>
+                  </div>
                 </div>
-
-              {% endfor %}
-            </div>
+              </div>
+            {% endfor %}
           </div>
         </div>
+      </div>
     </div>
   </div>
-  
+
   <form method="POST" class="form-control">
     {% csrf_token %}
     {{ list_form.as_p }}
     <button type="submit">ساخت لیست جدید</button>
   </form>
 
+  <!-- مودال جزئیات تسک -->
+  <div id="taskModal" style="display:none;">
+    <div class="modal-content">
+      <span class="close" onclick="$('#taskModal').hide();">&times;</span>
+      <h3 id="taskTitle"></h3>
+      <p><strong>توضیحات: </strong><span id="taskDescription"></span></p>
+      <p><strong>تاریخ شروع: </strong><span id="taskStartDate"></span></p>
+      <p><strong>تاریخ پایان: </strong><span id="taskEndDate"></span></p>
+      <p><strong>موعد تحویل: </strong><span id="taskDueDate"></span></p>
+      <p><strong>وضعیت: </strong><span id="taskStatus"></span></p>
+      <p><strong>اعضای مسئول: </strong></p>
+      <ul id="assignedUsers"></ul>
+    </div>
+  </div>
+  
+  <script>
+    var taskDetailsUrl = "{% url 'task_details_json' task_id=0 %}";
+    function openTaskDetails(taskId) {
+    var url = taskDetailsUrl.replace('0', taskId);  // جایگزین کردن taskId در URL
+    $.ajax({
+        url: url,  // استفاده از URL تولید شده
+        method: 'GET',
+        dataType: 'json',
+        success: function(data) {
+            // نمایش جزئیات تسک در مودال
+            $("#taskTitle").text(data.name);
+            $("#taskDescription").text(data.description);
+            $("#taskStartDate").text(data.start_date);
+            $("#taskEndDate").text(data.end_date);
+            $("#taskDueDate").text(data.due_date);
+            $("#taskStatus").text(data.is_completed ? 'انجام شده' : 'در حال انجام');
+            const assignedUsers = $("#assignedUsers");
+            assignedUsers.empty();
+            $.each(data.assigned_users, function(index, user) {
+                assignedUsers.append("<li>" + user.username + "</li>");
+            });
+            $("#taskModal").show();
+        },
+        error: function(xhr, status, error) {
+            console.error("Error fetching task details:", error);
+        }
+    });
+}
+  </script>
 
 {% endblock %}
+
