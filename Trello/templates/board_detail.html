@@ -1,6 +1,23 @@
 {% extends 'core.html' %}
-
 {% block content %}
+    <div onclick="$('#taskModal').hide();$('#lightbox').hide();" id="lightbox" class=" border text-center" style="width: 100%; height: 100%; background-color: black; opacity: 0.7; color: white; position: fixed; top:0; bottom:0; right:0; left:0; z-index: 1;"  > &nbsp; </div>
+    <div class="container" id="taskModal" style="z-index: 2; position: fixed; top:10rem; right: 0; left: 0; "> 
+      <div class="row">
+        <div class="col-12 bg-light text-dark">
+          <div class="modal-content text-center">
+            <span class="close" onclick="$('#lightbox').hide(); $('#taskModal').hide();">&times;</span>
+            <h3 id="taskTitle"></h3>
+            <p><strong>توضیحات: </strong><span id="taskDescription"></span></p>
+            <p><strong>تاریخ شروع: </strong><span id="taskStartDate"></span></p>
+            <p><strong>تاریخ پایان: </strong><span id="taskEndDate"></span></p>
+            <p><strong>موعد تحویل: </strong><span id="taskDueDate"></span></p>
+            <p><strong>وضعیت: </strong><span id="taskStatus"></span></p>
+            <p><strong>اعضای مسئول: </strong></p>
+            <ul id="assignedUsers"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
   <div class="container-fluid border">
     <div class="row justify-content-center">
       <div class="col-10 text-center border">
@@ -8,14 +25,27 @@
         <div class="container-fluid">
           <div class="row justify-content-center">
             {% for list in lists %}
-              <div class="col-3 text-center border">
-                <b>{{ list.name }}</b>
+              <div id="{{ list.id }}"  class="col-3 task-list text-center border">
+                <span id="list-name-{{ list.id }}" class="list-name" onclick="editListName({{ list.id }})">{{ list.name }}</span>
+                <input type="text" id="edit-list-name-{{ list.id }}" style="display: none;" onblur="saveListName({{ list.id }})">
                 <div class="container">
                   <div class="row justify-content-center">
                     <div class="col-12 border">
-                      {% for task in list.tasks.all %}
-                        <a href="javascript:void(0)" onclick="openTaskDetails({{ task.id }})">{{ task.name }}</a><br>
-                      {% endfor %}
+                        <div class="container">
+                          {% for task in list.tasks.all %}
+                            <div class="row">
+
+                                <div class="col-12">
+                                  <hr>
+                                  <div  class="task-item w-100 btn btn-outline-secondary" id="{{ task.id }}"  href="javascript:void(0)"  onclick="openTaskDetails({{ task.id }})">
+                                    {{ task.name }}
+                                  </div>
+                                  <hr>
+                                </div>
+                            </div>
+                          {% endfor %}
+                        </div>
+
                       <a href="{% url 'add_task' list.id %}">اضافه کردن تسک جدید</a>
                     </div>
                   </div>
@@ -27,57 +57,121 @@
       </div>
     </div>
   </div>
-
   <form method="POST" class="form-control">
     {% csrf_token %}
     {{ list_form.as_p }}
     <button type="submit">ساخت لیست جدید</button>
   </form>
-
-  <!-- مودال جزئیات تسک -->
-  <div id="taskModal" style="display:none;">
-    <div class="modal-content">
-      <span class="close" onclick="$('#taskModal').hide();">&times;</span>
-      <h3 id="taskTitle"></h3>
-      <p><strong>توضیحات: </strong><span id="taskDescription"></span></p>
-      <p><strong>تاریخ شروع: </strong><span id="taskStartDate"></span></p>
-      <p><strong>تاریخ پایان: </strong><span id="taskEndDate"></span></p>
-      <p><strong>موعد تحویل: </strong><span id="taskDueDate"></span></p>
-      <p><strong>وضعیت: </strong><span id="taskStatus"></span></p>
-      <p><strong>اعضای مسئول: </strong></p>
-      <ul id="assignedUsers"></ul>
-    </div>
-  </div>
-  
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
   <script>
+    $('#lightbox').hide();
+    $('#taskModal').hide()
+    var taskMoveUrl = "{% url 'move_task_to_list' task_id=0 %}";
+    function moveTaskToList(taskId, newListId) {
+      var url3 = taskMoveUrl.replace('0', taskId);
+      $.ajax({
+        url: url3,
+          method: "POST",
+          data: {
+              new_list_id: newListId 
+          },
+          headers: {
+            "X-CSRFToken": getCsrfToken()  
+           }
+          ,
+          success: function(response) {
+            location.reload();
+          },
+          error: function(xhr, status, error) {
+              alert("Error moving task: " + xhr.responseText);
+              location.reload();
+          }
+      });
+    }
+    $(".task-item").draggable({
+      revert: "invalid",
+      opacity: 0.1,
+      cursor: "move"
+    });
+    $(".task-list").droppable({
+      accept: ".task-item",
+      hoverClass: "ui-state-hover",
+      drop: function(event, ui) {
+          var taskId = ui.draggable.attr("id");  
+          var newListId = $(this).attr("id"); 
+          $(this).append(ui.draggable);
+          moveTaskToList(taskId,newListId);
+      }
+  });
     var taskDetailsUrl = "{% url 'task_details_json' task_id=0 %}";
     function openTaskDetails(taskId) {
-    var url = taskDetailsUrl.replace('0', taskId);  // جایگزین کردن taskId در URL
-    $.ajax({
-        url: url,  // استفاده از URL تولید شده
-        method: 'GET',
+      var url = taskDetailsUrl.replace('0', taskId);
+      $.ajax({
+          url: url,
+          method: 'GET',
+          dataType: 'json',
+          success: function(data) {
+              $("#taskTitle").text(data.name);
+              $("#taskDescription").text(data.description);
+              $("#taskStartDate").text(data.start_date);
+              $("#taskEndDate").text(data.end_date);
+              $("#taskDueDate").text(data.due_date);
+              $("#taskStatus").text(data.list_name);
+              const assignedUsers = $("#assignedUsers");
+              assignedUsers.empty();
+              $.each(data.assigned_users, function(index, user) {
+                  assignedUsers.append("<li>" + user.username + "</li>");
+              });
+              $('#lightbox').show();
+              $("#taskModal").show();
+              
+          },
+          error: function(xhr, status, error) {
+              console.error("مشکلی در دریافت پاسخ پیش آمد", error);
+          }
+      });
+    }
+    function getCsrfToken() {
+      var csrfToken = document.cookie.match(/csrftoken=([\w-]+)/);
+      return csrfToken ? csrfToken[1] : null;
+    }
+    function editListName(listId) {
+      const listNameElement = $('#list-name-' + listId);
+      const inputElement = $('#edit-list-name-' + listId);
+
+      inputElement.val(listNameElement.text());
+      listNameElement.hide();
+      inputElement.show();
+      window.currentListId = listId;
+    }
+    function saveListName(listId) {
+      const newName = $('#edit-list-name-' + listId).val();
+      if (!newName) {
+        alert('لطفاً یک نام وارد کنید.');
+        return;
+      }
+      $.ajax({
+        url: "{% url 'update_list_name' list_id=0 %}".replace('0', listId),
+        method: 'POST',
+        data: JSON.stringify({ name: newName }),
+        contentType: 'application/json',
         dataType: 'json',
-        success: function(data) {
-            // نمایش جزئیات تسک در مودال
-            $("#taskTitle").text(data.name);
-            $("#taskDescription").text(data.description);
-            $("#taskStartDate").text(data.start_date);
-            $("#taskEndDate").text(data.end_date);
-            $("#taskDueDate").text(data.due_date);
-            $("#taskStatus").text(data.is_completed ? 'انجام شده' : 'در حال انجام');
-            const assignedUsers = $("#assignedUsers");
-            assignedUsers.empty();
-            $.each(data.assigned_users, function(index, user) {
-                assignedUsers.append("<li>" + user.username + "</li>");
-            });
-            $("#taskModal").show();
+        headers: {
+          'X-CSRFToken': $('input[name=csrfmiddlewaretoken]').val() 
+        },
+        success: function(response) {
+          if (response.name) {
+            $('#list-name-' + listId).text(response.name);
+            $('#edit-list-name-' + listId).hide();
+            $('#list-name-' + listId).show();
+          }
         },
         error: function(xhr, status, error) {
-            console.error("Error fetching task details:", error);
+          console.error("خطا:", error);
+          alert('نام لیست تغییر نکرد');
         }
-    });
-}
+      });
+    }
   </script>
-
 {% endblock %}
-

@@ -1,6 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login,authenticate
-from django.http import JsonResponse
+from .serializers import *
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from rest_framework import status
 from django.contrib.auth.decorators import login_required
 from .forms import *
 
@@ -109,15 +112,44 @@ def add_task(request, list_id):
         task_form.fields["assigned_users"].queryset = team.members.all()
     return render(request, 'add_task.html', {'task_form': task_form, 'list': task_list})
 
+def update_list_name(request, list_id):
+    if request.method == 'POST':
+        list = get_object_or_404(List, id=list_id)
+        new_name = request.POST.get('name')
+        if new_name:
+            list.name = new_name
+            list.save()
+            return JsonResponse({'message': 'Name updated successfully', 'new_name': list.name})
+        return JsonResponse({'error': 'Invalid name'}, status=400)
+
+@api_view(['POST'])
+def update_list_name(request, list_id):
+    list = get_object_or_404(List, id=list_id)
+    new_name = request.data.get('name')
+    if new_name:
+        list.name = new_name
+        list.save()
+        serializer = ListSerializer(list)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response({'error': 'Invalid name'}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
 def task_details_json(request, task_id):
     task = get_object_or_404(Task, id=task_id)
-    task_data = {
-        "name": task.name,
-        "description": task.description,
-        "start_date": task.start_date,
-        "end_date": task.end_date,
-        "due_date": task.due_date,
-        "is_completed": task.is_completed,
-        "assigned_users": [{"username": user.username} for user in task.assigned_users.all()],
-    }
-    return JsonResponse(task_data)
+    serializer = TaskSerializer(task)
+    return Response(serializer.data)
+
+
+@api_view(['POST'])
+def move_task_to_list(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    if task.assigned_users.filter(id=request.user.id).exists():
+        new_list_id = request.data.get('new_list_id')
+        new_list = get_object_or_404(List, id=new_list_id)
+
+        task.list = new_list
+        task.save()
+        
+        return Response("با موفقیت انجام شد!", status=status.HTTP_200_OK)
+    else:
+        return Response("شما دسترسی لازم برای اینکار را ندارید!", status=status.HTTP_403_FORBIDDEN)
