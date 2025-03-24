@@ -21,11 +21,12 @@
   <div class="container-fluid border">
     <div class="row justify-content-center">
       <div class="col-10 text-center border">
-        <h2>{{ board.name }}</h2>
+        <h2>{{ board.name }}</h2><hr>
         <div class="container-fluid">
           <div class="row justify-content-center">
             {% for list in lists %}
               <div id="{{ list.id }}"  class="col-3 task-list text-center border">
+                <button class="btn btn-danger btn-sm delete-list" onclick="deleteList({{ list.id }})">🗑</button>
                 <span id="list-name-{{ list.id }}" class="list-name" onclick="editListName({{ list.id }})">{{ list.name }}</span>
                 <input type="text" id="edit-list-name-{{ list.id }}" style="display: none;" onblur="saveListName({{ list.id }})">
                 <div class="container">
@@ -46,7 +47,9 @@
                           {% endfor %}
                         </div>
 
-                      <a href="{% url 'add_task' list.id %}">اضافه کردن تسک جدید</a>
+                      <a href="{% url 'add_task' list.id %}" style="text-decoration: none;" class="text-dark">تسک جدید<svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="100" viewBox="0 0 50 50">
+                        <path d="M 25 2 C 12.309295 2 2 12.309295 2 25 C 2 37.690705 12.309295 48 25 48 C 37.690705 48 48 37.690705 48 25 C 48 12.309295 37.690705 2 25 2 z M 25 4 C 36.609824 4 46 13.390176 46 25 C 46 36.609824 36.609824 46 25 46 C 13.390176 46 4 36.609824 4 25 C 4 13.390176 13.390176 4 25 4 z M 24 13 L 24 24 L 13 24 L 13 26 L 24 26 L 24 37 L 26 37 L 26 26 L 37 26 L 37 24 L 26 24 L 26 13 L 24 13 z"></path>
+                        </svg></a>
                     </div>
                   </div>
                 </div>
@@ -57,16 +60,38 @@
       </div>
     </div>
   </div>
-  <form method="POST" class="form-control">
-    {% csrf_token %}
-    {{ list_form.as_p }}
-    <button type="submit">ساخت لیست جدید</button>
-  </form>
+  <div class="container" style="margin-top: 3rem;">
+    <div class="row justify-content-center">
+      <div class="col-3">
+        <form method="POST" class="form-control">
+          {% csrf_token %}
+          {{ list_form.as_p }}
+          <button type="submit " class="btn btn-secondary">ساخت لیست جدید</button>
+        </form>
+      </div>
+    </div>
+  </div>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
   <script>
     $('#lightbox').hide();
-    $('#taskModal').hide()
+    $('#taskModal').hide();
+    function deleteList(listId) {
+        $.ajax({
+            url: "{% url 'delete_list' list_id=0 %}".replace('0', listId),
+            method: "DELETE",
+            headers: { "X-CSRFToken": getCsrfToken() },
+            success: function () {
+                location.reload();
+                $("#list-" + listId).fadeOut(300, function () {
+                    $(this).remove();
+                });
+            },
+            error: function (xhr) {
+                alert("خطا در حذف لیست: " + xhr.responseText);
+            }
+        });
+    }
     var taskMoveUrl = "{% url 'move_task_to_list' task_id=0 %}";
     function moveTaskToList(taskId, newListId) {
       var url3 = taskMoveUrl.replace('0', taskId);

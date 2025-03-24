@@ -1,11 +1,20 @@
 import jdatetime
 from rest_framework import serializers
 from .models import Task,List
+from rest_framework import status
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from rest_framework.views import APIView
 
 class ListSerializer(serializers.ModelSerializer):
     class Meta:
         model = List
         fields = ['id', 'name']
+class ListDeleteAPIView(APIView):
+    def delete(self, request, list_id):
+        list_obj = get_object_or_404(List, id=list_id)
+        list_obj.delete()
+        return Response({"message": "لیست با موفقیت حذف شد."}, status=status.HTTP_204_NO_CONTENT)
 
 class TaskSerializer(serializers.ModelSerializer):
     assigned_users = serializers.SerializerMethodField()

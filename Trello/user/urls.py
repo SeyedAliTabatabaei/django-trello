@@ -1,7 +1,7 @@
 from django.urls import path
 from django.contrib.auth.views import LogoutView
 from .views import *
-
+from .serializers import ListDeleteAPIView
 urlpatterns = [
     path('register/', register, name='register'),
     path('login/', login_view, name='login'),
@@ -10,6 +10,7 @@ urlpatterns = [
     path("team/<int:team_id>/create-board/", create_board, name="create-board"),
     #path('create/', create_board, name='create_board'),
     path('list/<int:list_id>/update/', update_list_name, name='update_list_name'),
+    path('lists/<int:list_id>/delete', ListDeleteAPIView.as_view(), name='delete_list'),
     path('task/<int:task_id>/details/',task_details_json, name='task_details_json'),
     path('task/<int:task_id>/move/', move_task_to_list, name='move_task_to_list'),
     path('boardlist/', board_list, name='board_list'),

@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login,authenticate
 from .serializers import *
+
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
@@ -143,13 +144,11 @@ def task_details_json(request, task_id):
 @api_view(['POST'])
 def move_task_to_list(request, task_id):
     task = get_object_or_404(Task, id=task_id)
-    if task.assigned_users.filter(id=request.user.id).exists():
-        new_list_id = request.data.get('new_list_id')
-        new_list = get_object_or_404(List, id=new_list_id)
-
-        task.list = new_list
-        task.save()
-        
-        return Response("با موفقیت انجام شد!", status=status.HTTP_200_OK)
-    else:
-        return Response("شما دسترسی لازم برای اینکار را ندارید!", status=status.HTTP_403_FORBIDDEN)
+    #if task.assigned_users.filter(id=request.user.id).exists():
+    new_list_id = request.data.get('new_list_id')
+    new_list = get_object_or_404(List, id=new_list_id)
+    task.list = new_list
+    task.save()
+    return Response("با موفقیت انجام شد!", status=status.HTTP_200_OK)
+   # else:
+       # return Response("شما دسترسی لازم برای اینکار را ندارید!", status=status.HTTP_403_FORBIDDEN)

@@ -1,13 +1,33 @@
 {% extends "core.html" %}
 {% block content %}
-    تیم های شما
-    {% for team in user_teams %}
-       <br> <a href="{% url 'create-board' team.id %}">{{ team.name }}</a> <br>
-    {% endfor %}
-    <h2>ساخت تیم جدید</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">ایجاد تیم</button>
-    </form>
+
+
+    <div class="container border p-10">
+        <div class="row justify-content-center">
+            <div class="col-6">
+              <h2>  تیم های شما</h2>
+            </div>
+        </div>
+        {% for team in user_teams %}
+            <div class="row justify-content-center">
+                <div class="col-6 ">
+                    <a href="{% url 'create-board' team.id %}">
+                        <button class="btn btn-secondary w-100">{{ team.name }}</button><br>
+                    </a> <br>
+                </div>
+            </div>
+            
+        {% endfor %}
+        <hr>
+        <div class="row justify-content-center">
+            <div class="col-6">
+                <h2>ساخت تیم جدید</h2>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-success w-100">ایجاد تیم</button>
+                </form>
+            </div>
+        </div>
+    </div>
 {% endblock %}

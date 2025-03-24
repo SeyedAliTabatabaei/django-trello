@@ -7,6 +7,7 @@
     <title>صفحه اصلی</title>
     <link href="{% static 'bootstrap.min.css' %} " rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
   </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -59,5 +60,10 @@
    
    
     <script src="{% static 'bootstrap.bundle.min.js' %}" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-</body>
+    <script>
+      document.querySelectorAll("input").forEach(input => {
+          input.classList.add("form-control");
+      });
+    </script>
+  </body>
 </html>

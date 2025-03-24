@@ -23,6 +23,9 @@ class TeamForm(forms.ModelForm):
     members_usernames = forms.CharField(
         label="یوزرنیم اعضا (با کاما جدا کنید)", required=False
     )
+    name = forms.CharField(
+        label="نام تیم",
+    )
 
     class Meta:
         model = Team
@@ -39,11 +42,17 @@ class TeamForm(forms.ModelForm):
         return []
 
 class BoardForm(forms.ModelForm):
+    name = forms.CharField(label='',widget=forms.TextInput(attrs={'placeholder': 'نام تیم'}))
+    description = forms.CharField(label='',widget=forms.Textarea(attrs={'placeholder': 'توضیحات','class':'form-control'}))
     class Meta:
         model = Board
         fields = ['name', 'description']
 
 class ListForm(forms.ModelForm):
+
+    name = forms.CharField(
+        label="نام لیست",
+    )
     class Meta:
         model = List
         fields = ['name']
