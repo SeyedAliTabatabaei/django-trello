@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login,authenticate
 from .serializers import *
-
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
@@ -152,3 +151,13 @@ def move_task_to_list(request, task_id):
     return Response("با موفقیت انجام شد!", status=status.HTTP_200_OK)
    # else:
        # return Response("شما دسترسی لازم برای اینکار را ندارید!", status=status.HTTP_403_FORBIDDEN)
+
+@api_view(['PATCH'])
+def update_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    
+    serializer = TaskSerializer(task, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

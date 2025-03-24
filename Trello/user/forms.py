@@ -42,7 +42,7 @@ class TeamForm(forms.ModelForm):
         return []
 
 class BoardForm(forms.ModelForm):
-    name = forms.CharField(label='',widget=forms.TextInput(attrs={'placeholder': 'نام تیم'}))
+    name = forms.CharField(label='',widget=forms.TextInput(attrs={'placeholder': 'نام بورد'}))
     description = forms.CharField(label='',widget=forms.Textarea(attrs={'placeholder': 'توضیحات','class':'form-control'}))
     class Meta:
         model = Board

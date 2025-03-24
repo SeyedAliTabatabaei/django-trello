@@ -1,202 +1,362 @@
 {% extends 'core.html' %}
 {% block content %}
-    <div onclick="$('#taskModal').hide();$('#lightbox').hide();" id="lightbox" class=" border text-center" style="width: 100%; height: 100%; background-color: black; opacity: 0.7; color: white; position: fixed; top:0; bottom:0; right:0; left:0; z-index: 1;"  > &nbsp; </div>
-    <div class="container" id="taskModal" style="z-index: 2; position: fixed; top:10rem; right: 0; left: 0; "> 
-      <div class="row">
-        <div class="col-12 bg-light text-dark">
-          <div class="modal-content text-center">
-            <span class="close" onclick="$('#lightbox').hide(); $('#taskModal').hide();">&times;</span>
-            <h3 id="taskTitle"></h3>
-            <p><strong>توضیحات: </strong><span id="taskDescription"></span></p>
-            <p><strong>تاریخ شروع: </strong><span id="taskStartDate"></span></p>
-            <p><strong>تاریخ پایان: </strong><span id="taskEndDate"></span></p>
-            <p><strong>موعد تحویل: </strong><span id="taskDueDate"></span></p>
-            <p><strong>وضعیت: </strong><span id="taskStatus"></span></p>
-            <p><strong>اعضای مسئول: </strong></p>
-            <ul id="assignedUsers"></ul>
-          </div>
+<div onclick="$('#taskModal').hide();$('#lightbox').hide();location.reload();" id="lightbox" class=" border text-center"
+  style="width: 100%; height: 100%; background-color: black; opacity: 0.7; color: white; position: fixed; top:0; bottom:0; right:0; left:0; z-index: 1;">
+  &nbsp; </div>
+<div class="container" id="taskModal" style="z-index: 2; position: fixed; top:10rem; right: 0; width: 40%; left: 0; ">
+  <div class="row justify-content-center">
+    <div class="col-12 bg-light text-dark">
+      <div class="modal-content text-center">
+        <span class="close" onclick="$('#lightbox').hide(); $('#taskModal').hide();location.reload();">&times;</span>
+        <h3 id="taskTitle" onclick="makeEditable('taskTitle', 'name')"></h3>
+        <div id="divtaskid" class="d-none"></div>
+        <p><strong>توضیحات: </strong><span id="taskDescription"
+            onclick="makeEditable('taskDescription', 'description')"></p>
+        <p><strong>تاریخ شروع: </strong><span id="taskStartDate"
+            onclick="makeEditable('taskStartDate', 'start_date')"></span></p>
+        <p><strong>تاریخ پایان: </strong><span id="taskEndDate"
+            onclick="makeEditable('taskEndDate', 'end_date')"></span></p>
+        <p><strong>موعد تحویل: </strong><span id="taskDueDate" onclick="makeEditable('taskDueDate', 'due_date')"></span>
+        </p>
+        <p><strong>وضعیت: </strong><span id="taskStatus" onclick="makeEditable('taskStatus', 'status',)"></span></p>
+        <p><strong>اعضای مسئول: </strong></p>
+        <div id="assignedUsersCheckboxes">
+
         </div>
+        <ul id="assignedUsers"></ul>
       </div>
     </div>
-  <div class="container-fluid border">
-    <div class="row justify-content-center">
-      <div class="col-10 text-center border">
-        <h2>{{ board.name }}</h2><hr>
-        <div class="container-fluid">
-          <div class="row justify-content-center">
-            {% for list in lists %}
-              <div id="{{ list.id }}"  class="col-3 task-list text-center border">
-                <button class="btn btn-danger btn-sm delete-list" onclick="deleteList({{ list.id }})">🗑</button>
-                <span id="list-name-{{ list.id }}" class="list-name" onclick="editListName({{ list.id }})">{{ list.name }}</span>
-                <input type="text" id="edit-list-name-{{ list.id }}" style="display: none;" onblur="saveListName({{ list.id }})">
-                <div class="container">
-                  <div class="row justify-content-center">
-                    <div class="col-12 border">
-                        <div class="container">
-                          {% for task in list.tasks.all %}
-                            <div class="row">
+  </div>
+</div>
+<div class="container-fluid border">
+  <div class="row justify-content-center">
+    <div class="col-10 text-center border">
+      <h2>{{ board.name }}</h2>
+      <hr>
+      <div class="container-fluid">
+        <div class="row justify-content-center">
+          {% for list in lists %}
+          <div id="{{ list.id }}" class="col-3 task-list text-center border">
+            <button class="btn btn-danger btn-sm delete-list" onclick="deleteList({{ list.id }})">🗑</button>
+            <span id="list-name-{{ list.id }}" class="list-name"
+              onclick="editListName({{list.id}})">{{list.name}}</span>
+            <input type="text" id="edit-list-name-{{ list.id }}" style="display: none;"
+              onblur="saveListName({{list.id}})">
+            <div class="container">
+              <div class="row justify-content-center">
+                <div class="col-12 border">
+                  <div class="container">
+                    {% for task in list.tasks.all %}
+                    <div class="row">
 
-                                <div class="col-12">
-                                  <hr>
-                                  <div  class="task-item w-100 btn btn-outline-secondary" id="{{ task.id }}"  href="javascript:void(0)"  onclick="openTaskDetails({{ task.id }})">
-                                    {{ task.name }}
-                                  </div>
-                                  <hr>
-                                </div>
-                            </div>
-                          {% endfor %}
+                      <div class="col-12">
+                        <hr>
+                        <div class="task-item w-100 btn btn-outline-secondary" id="{{ task.id }}"
+                          href="javascript:void(0)" onclick="openTaskDetails({{ task.id }})">
+                          {{ task.name }}
                         </div>
-
-                      <a href="{% url 'add_task' list.id %}" style="text-decoration: none;" class="text-dark">تسک جدید<svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="100" viewBox="0 0 50 50">
-                        <path d="M 25 2 C 12.309295 2 2 12.309295 2 25 C 2 37.690705 12.309295 48 25 48 C 37.690705 48 48 37.690705 48 25 C 48 12.309295 37.690705 2 25 2 z M 25 4 C 36.609824 4 46 13.390176 46 25 C 46 36.609824 36.609824 46 25 46 C 13.390176 46 4 36.609824 4 25 C 4 13.390176 13.390176 4 25 4 z M 24 13 L 24 24 L 13 24 L 13 26 L 24 26 L 24 37 L 26 37 L 26 26 L 37 26 L 37 24 L 26 24 L 26 13 L 24 13 z"></path>
-                        </svg></a>
+                        <hr>
+                      </div>
                     </div>
+                    {% endfor %}
                   </div>
+                  <a class="create-task"  data-list-id="{{list.id}}" onclick="makeEditable()" id="add-task-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="100" viewBox="0 0 50 50">
+                      <path
+                        d="M 25 2 C 12.309295 2 2 12.309295 2 25 C 2 37.690705 12.309295 48 25 48 C 37.690705 48 48 37.690705 48 25 C 48 12.309295 37.690705 2 25 2 z M 25 4 C 36.609824 4 46 13.390176 46 25 C 46 36.609824 36.609824 46 25 46 C 13.390176 46 4 36.609824 4 25 C 4 13.390176 13.390176 4 25 4 z M 24 13 L 24 24 L 13 24 L 13 26 L 24 26 L 24 37 L 26 37 L 26 26 L 37 26 L 37 24 L 26 24 L 26 13 L 24 13 z">
+                      </path>
+                    </svg>
+                  </a>
+                  <!-- <a href="{% url 'add_task' list.id %}" style="text-decoration: none;" class="text-dark">تسک جدید</a> -->
                 </div>
               </div>
-            {% endfor %}
+            </div>
           </div>
+          {% endfor %}
         </div>
       </div>
     </div>
   </div>
-  <div class="container" style="margin-top: 3rem;">
-    <div class="row justify-content-center">
-      <div class="col-3">
-        <form method="POST" class="form-control">
-          {% csrf_token %}
-          {{ list_form.as_p }}
-          <button type="submit " class="btn btn-secondary">ساخت لیست جدید</button>
-        </form>
-      </div>
+</div>
+<div class="container" style="margin-top: 3rem;">
+  <div class="row justify-content-center">
+    <div class="col-3">
+      <form method="POST" class="form-control">
+        {% csrf_token %}
+        {{ list_form.as_p }}
+        <button type="submit " class="btn btn-secondary">ساخت لیست جدید</button>
+      </form>
     </div>
   </div>
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
-  <script>
-    $('#lightbox').hide();
-    $('#taskModal').hide();
-    function deleteList(listId) {
-        $.ajax({
-            url: "{% url 'delete_list' list_id=0 %}".replace('0', listId),
-            method: "DELETE",
-            headers: { "X-CSRFToken": getCsrfToken() },
-            success: function () {
-                location.reload();
-                $("#list-" + listId).fadeOut(300, function () {
-                    $(this).remove();
-                });
-            },
-            error: function (xhr) {
-                alert("خطا در حذف لیست: " + xhr.responseText);
-            }
-        });
-    }
-    var taskMoveUrl = "{% url 'move_task_to_list' task_id=0 %}";
-    function moveTaskToList(taskId, newListId) {
-      var url3 = taskMoveUrl.replace('0', taskId);
-      $.ajax({
-        url: url3,
-          method: "POST",
-          data: {
-              new_list_id: newListId 
-          },
-          headers: {
-            "X-CSRFToken": getCsrfToken()  
-           }
-          ,
-          success: function(response) {
-            location.reload();
-          },
-          error: function(xhr, status, error) {
-              alert("Error moving task: " + xhr.responseText);
-              location.reload();
-          }
-      });
-    }
-    $(".task-item").draggable({
-      revert: "invalid",
-      opacity: 0.1,
-      cursor: "move"
-    });
-    $(".task-list").droppable({
-      accept: ".task-item",
-      hoverClass: "ui-state-hover",
-      drop: function(event, ui) {
-          var taskId = ui.draggable.attr("id");  
-          var newListId = $(this).attr("id"); 
-          $(this).append(ui.draggable);
-          moveTaskToList(taskId,newListId);
-      }
-  });
-    var taskDetailsUrl = "{% url 'task_details_json' task_id=0 %}";
-    function openTaskDetails(taskId) {
-      var url = taskDetailsUrl.replace('0', taskId);
-      $.ajax({
-          url: url,
-          method: 'GET',
-          dataType: 'json',
-          success: function(data) {
-              $("#taskTitle").text(data.name);
-              $("#taskDescription").text(data.description);
-              $("#taskStartDate").text(data.start_date);
-              $("#taskEndDate").text(data.end_date);
-              $("#taskDueDate").text(data.due_date);
-              $("#taskStatus").text(data.list_name);
-              const assignedUsers = $("#assignedUsers");
-              assignedUsers.empty();
-              $.each(data.assigned_users, function(index, user) {
-                  assignedUsers.append("<li>" + user.username + "</li>");
-              });
-              $('#lightbox').show();
-              $("#taskModal").show();
-              
-          },
-          error: function(xhr, status, error) {
-              console.error("مشکلی در دریافت پاسخ پیش آمد", error);
-          }
-      });
-    }
-    function getCsrfToken() {
-      var csrfToken = document.cookie.match(/csrftoken=([\w-]+)/);
-      return csrfToken ? csrfToken[1] : null;
-    }
-    function editListName(listId) {
-      const listNameElement = $('#list-name-' + listId);
-      const inputElement = $('#edit-list-name-' + listId);
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<script>
 
-      inputElement.val(listNameElement.text());
-      listNameElement.hide();
-      inputElement.show();
-      window.currentListId = listId;
-    }
-    function saveListName(listId) {
-      const newName = $('#edit-list-name-' + listId).val();
-      if (!newName) {
-        alert('لطفاً یک نام وارد کنید.');
-        return;
-      }
-      $.ajax({
-        url: "{% url 'update_list_name' list_id=0 %}".replace('0', listId),
-        method: 'POST',
-        data: JSON.stringify({ name: newName }),
-        contentType: 'application/json',
-        dataType: 'json',
-        headers: {
-          'X-CSRFToken': $('input[name=csrfmiddlewaretoken]').val() 
-        },
-        success: function(response) {
-          if (response.name) {
-            $('#list-name-' + listId).text(response.name);
-            $('#edit-list-name-' + listId).hide();
-            $('#list-name-' + listId).show();
-          }
-        },
-        error: function(xhr, status, error) {
-          console.error("خطا:", error);
-          alert('نام لیست تغییر نکرد');
+  $('.create-task').click(function () {
+    var listId = $(this).data('list-id');
+    if ($('#task-input-' + listId).length === 0) {
+      var inputField = $('<input>', {
+        type: 'text',
+        id: 'task-input-' + listId,
+        placeholder: 'نام تسک جدید',
+        class: 'form-control'
+      }).appendTo($(this).parent());
+      inputField.focus();
+      inputField.blur(function () {
+        var taskName = inputField.val().trim();
+        if (!taskName) {
+          inputField.remove();
+          return;
         }
+        $.ajax({
+          url:  "{% url 'add_task' list_id=0 %}".replace('0', listId),
+          method: 'POST',
+          data: {
+            'name': taskName,
+            'list': listId,
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+          },
+          success: function (data) {
+            location.reload();
+            var taskHtml = `
+                            <div class="task-item" id="task-${data.id}">
+                                ${data.name}
+                            </div>
+                        `;
+            $('#task-list-' + listId).append(taskHtml);
+            inputField.remove();
+          },
+          error: function (xhr, status, error) {
+            alert("خطا در ایجاد تسک: " + xhr.responseText);
+          }
+        });
       });
     }
-  </script>
+  });
+  $(document).keydown(function (event) {
+    if (event.keyCode == 27) {
+      event.preventDefault();
+      location.reload();
+      $('#taskModal').hide();
+      $('#lightbox').hide();
+
+    }
+  });
+  $('#lightbox').hide();
+  $('#taskModal').hide();
+  function deleteList(listId) {
+    $.ajax({
+      url: "{% url 'delete_list' list_id=0 %}".replace('0', listId),
+      method: "DELETE",
+      headers: { "X-CSRFToken": getCsrfToken() },
+      success: function () {
+        location.reload();
+        $("#list-" + listId).fadeOut(300, function () {
+          $(this).remove();
+        });
+      },
+      error: function (xhr) {
+        alert("خطا در حذف لیست: " + xhr.responseText);
+      }
+    });
+  }
+
+  var taskMoveUrl = "{% url 'move_task_to_list' task_id=0 %}";
+  function moveTaskToList(taskId, newListId) {
+    var url3 = taskMoveUrl.replace('0', taskId);
+    $.ajax({
+      url: url3,
+      method: "POST",
+      data: {
+        new_list_id: newListId
+      },
+      headers: {
+        "X-CSRFToken": getCsrfToken()
+      }
+      ,
+      success: function (response) {
+        location.reload();
+      },
+      error: function (xhr, status, error) {
+        alert("Error moving task: " + xhr.responseText);
+        location.reload();
+      }
+    });
+  }
+  $(".task-item").draggable({
+    revert: "invalid",
+    opacity: 0.1,
+    cursor: "move"
+  });
+  $(".task-list").droppable({
+    accept: ".task-item",
+    hoverClass: "ui-state-hover",
+    drop: function (event, ui) {
+      var taskId = ui.draggable.attr("id");
+      var newListId = $(this).attr("id");
+      $(this).append(ui.draggable);
+      moveTaskToList(taskId, newListId);
+    }
+  });
+  var taskDetailsUrl = "{% url 'task_details_json' task_id=0 %}";
+  function openTaskDetails(taskId) {
+    var url = taskDetailsUrl.replace('0', taskId);
+    $.ajax({
+      url: url,
+      method: 'GET',
+      dataType: 'json',
+      success: function (data) {
+        var startdate = new Date(data.start_date);
+        var startdate = startdate.toLocaleDateString('fa-IR');
+        var duedate = new Date(data.due_date);
+        var duedate = duedate.toLocaleDateString('fa-IR');
+        var enddate = new Date(data.end_date);
+        var enddate = enddate.toLocaleDateString('fa-IR');
+        $("#taskid").text(data.id);
+        $("#divtaskid").attr('value', data.id)
+        $("#taskTitle").text(data.name);
+        $("#taskDescription").text(data.description);
+        $("#taskStartDate").text(startdate);
+        $("#taskEndDate").text(enddate);
+        $("#taskDueDate").text(duedate);
+        $("#taskStatus").text(data.list_name);
+        const assignedUsersCheckboxes = $("#assignedUsersCheckboxes");
+        assignedUsersCheckboxes.empty();
+        $.each(data.team_members, function (index, user) {
+          var checked = data.assigned_users.includes(user.id) ? "checked" : ""; // اگر عضو مسئول است، چک باشد
+          var checkboxHtml = `<label><input type="checkbox" class="user-checkbox" data-user-id="${user.id}" ${checked}> ${user.username}</label><br>`;
+          assignedUsersCheckboxes.append(checkboxHtml);
+        });
+        $('#lightbox').show();
+        $("#taskModal").show();
+
+      },
+      error: function (xhr, status, error) {
+        console.error("مشکلی در دریافت پاسخ پیش آمد", error);
+      }
+    });
+  }
+  function getCsrfToken() {
+    var csrfToken = document.cookie.match(/csrftoken=([\w-]+)/);
+    return csrfToken ? csrfToken[1] : null;
+  }
+  function editListName(listId) {
+    const listNameElement = $('#list-name-' + listId);
+    const inputElement = $('#edit-list-name-' + listId);
+
+    inputElement.val(listNameElement.text());
+    listNameElement.hide();
+    inputElement.show();
+    window.currentListId = listId;
+  }
+  function saveListName(listId) {
+    const newName = $('#edit-list-name-' + listId).val();
+    if (!newName) {
+      alert('لطفاً یک نام وارد کنید.');
+      return;
+    }
+    $.ajax({
+      url: "{% url 'update_list_name' list_id=0 %}".replace('0', listId),
+      method: 'POST',
+      data: JSON.stringify({ name: newName }),
+      contentType: 'application/json',
+      dataType: 'json',
+      headers: {
+        'X-CSRFToken': $('input[name=csrfmiddlewaretoken]').val()
+      },
+      success: function (response) {
+        if (response.name) {
+          $('#list-name-' + listId).text(response.name);
+          $('#edit-list-name-' + listId).hide();
+          $('#list-name-' + listId).show();
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error("خطا:", error);
+        alert('نام لیست تغییر نکرد');
+      }
+    });
+  }
+
+
+  function makeEditable(elementId, fieldName) {
+    taskId = $("#divtaskid").attr('value');
+    var element = $("#" + elementId);
+    var originalValue = element.text().trim();
+    var inputType = "text";
+    if (fieldName.includes("date")) {
+      inputType = "date";
+    }
+    var inputElement = $("<input>", {
+      type: inputType,
+      id: elementId,
+      value: originalValue,
+      class: "form-control",
+      blur: function () {
+        saveTaskField(taskId, fieldName, $(this).val(), elementId);
+      },
+      keypress: function (e) {
+        if (e.which === 13) {
+          saveTaskField(taskId, fieldName, $(this).val(), elementId);
+        }
+      }
+    });
+    element.replaceWith(inputElement);
+    inputElement.focus();
+  }
+
+  function saveTaskField(taskId, fieldName, newValue, elementId) {
+    if (!newValue.trim()) {
+      alert("مقدار نمی‌تواند خالی باشد!");
+      return;
+    }
+    $.ajax({
+      url: "{% url 'task_update' task_id=0 %}".replace('0', taskId),
+      method: "PATCH",
+      data: JSON.stringify({ [fieldName]: newValue }),
+      contentType: "application/json",
+      headers: {
+        "X-CSRFToken": getCsrfToken()
+      },
+      success: function (response) {
+        element = $('#' + elementId);
+        if (elementId == "taskTitle") {
+          var updatedElement = $("<h3>", {
+            id: element.attr("id"),
+            text: newValue,
+            click: function () {
+              makeEditable(element.attr("id"), fieldName);
+            }
+          });
+        } else {
+          if (elementId == "taskStartDate" || elementId == "taskDueDate" || elementId == "taskEndDate") {
+            var newdate = new Date(newValue);
+            var newdate = newdate.toLocaleDateString('fa-IR');
+
+            var updatedElement = $("<span>", {
+              id: element.attr("id"),
+              text: newdate,
+              click: function () {
+                makeEditable(element.attr("id"), fieldName);
+              }
+            });
+          } else {
+            var updatedElement = $("<span>", {
+              id: element.attr("id"),
+              text: newValue,
+              click: function () {
+                makeEditable(element.attr("id"), fieldName);
+              }
+            });
+          }
+        }
+        element.replaceWith(updatedElement);
+      },
+      error: function (xhr) {
+        alert("خطا در ذخیره تغییرات: " + xhr.responseText);
+      }
+    });
+  }
+</script>
 {% endblock %}
