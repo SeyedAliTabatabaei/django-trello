@@ -4,7 +4,10 @@ from django.contrib.auth.models import User
 from .models import *
 
 class SignUpForm(UserCreationForm):
-    email = forms.EmailField(required=True)
+    username = forms.CharField(label='',required=True,widget=forms.TextInput(attrs={'placeholder':'نام کاربری'}))
+    email = forms.EmailField(label='',required=True,widget=forms.EmailInput(attrs={'placeholder':'ایمیل خود را وارد کنید'}))
+    password1 = forms.CharField(label='',required=True,widget=forms.PasswordInput(attrs={'placeholder':'گذرواژه '}))
+    password2 = forms.CharField(label='',required=True,widget=forms.PasswordInput(attrs={'placeholder':'تکرار گذرواژه'}))
 
     class Meta:
         model = User

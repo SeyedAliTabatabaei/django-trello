@@ -1,15 +1,21 @@
 {% extends 'core.html' %}
-
 {% block content %}
-  <h2>برد های من</h2>
-  <ul>
-    {% for board in boards %}
-      <a href="{% url 'board_detail' board.id %}">
-        <li>{{ board.name }} - {{ board.description }}</li>
-      </a>      
-    {% empty %}
-      <li>شما هنوز بردی نساختید</li>
-      <a href="{% url 'create_team' %}">ایجاد برد جدید</a>
-    {% endfor %}
-  </ul>
+  <div class="container pt-3 mt-3 border">
+    <div class="row justify-content-center">
+        <div class="col-6">
+          <h2>بورد های من</h2>
+          <ul>
+            {% for board in boards %}
+              <a style="text-decoration: none;" href="{% url 'board_detail' board.id %}">
+                <li>{{ board.name }} - {{ board.description }}</li>
+              </a>      
+            {% empty %}
+              <li>شما هنوز تیمی ندارید!</li>
+              <a href="{% url 'create_team' %}">ایجاد تیم جدید</a>
+            {% endfor %}
+          </ul>
+        </div>
+    </div>
+  </div>
+
 {% endblock %}

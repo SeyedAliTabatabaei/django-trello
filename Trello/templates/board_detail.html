@@ -32,6 +32,9 @@
   <div class="row justify-content-center">
     <div class="col-10 text-center border">
       <h2>{{ board.name }}</h2>
+      <div class="border" style="padding:1rem">
+        <h6 class="text-secondary">{{ board.description }}</h6>
+      </div>
       <hr>
       <div class="container-fluid">
         <div class="row justify-content-center">
@@ -60,7 +63,7 @@
                     </div>
                     {% endfor %}
                   </div>
-                  <a class="create-task"  data-list-id="{{list.id}}" onclick="makeEditable()" id="add-task-button">
+                  <a class="create-task" data-list-id="{{list.id}}" onclick="makeEditable()" id="add-task-button">
                     <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="100" viewBox="0 0 50 50">
                       <path
                         d="M 25 2 C 12.309295 2 2 12.309295 2 25 C 2 37.690705 12.309295 48 25 48 C 37.690705 48 48 37.690705 48 25 C 48 12.309295 37.690705 2 25 2 z M 25 4 C 36.609824 4 46 13.390176 46 25 C 46 36.609824 36.609824 46 25 46 C 13.390176 46 4 36.609824 4 25 C 4 13.390176 13.390176 4 25 4 z M 24 13 L 24 24 L 13 24 L 13 26 L 24 26 L 24 37 L 26 37 L 26 26 L 37 26 L 37 24 L 26 24 L 26 13 L 24 13 z">
@@ -110,7 +113,7 @@
           return;
         }
         $.ajax({
-          url:  "{% url 'add_task' list_id=0 %}".replace('0', listId),
+          url: "{% url 'add_task' list_id=0 %}".replace('0', listId),
           method: 'POST',
           data: {
             'name': taskName,
@@ -199,6 +202,55 @@
       moveTaskToList(taskId, newListId);
     }
   });
+
+  $(document).on("change", ".assign-user", function () {
+
+    var userId = $(this).data("user-id");
+    var taskId = $(this).data("task-id");
+    var isChecked = $(this).is(":checked");
+
+    $.ajax({
+      url: "{% url 'assign_user' %}",
+      method: "POST",
+      data: {
+        user_id: userId,
+        task_id: taskId,
+        is_assigned: isChecked,
+        csrfmiddlewaretoken: "{{ csrf_token }}"
+      },
+      success: function (response) {
+        console.log("کاربر با موفقیت به تسک اختصاص یافت/حذف شد");
+      },
+      error: function (xhr, status, error) {
+        console.error("خطا در ذخیره مسئول تسک:", error);
+      }
+    });
+  });
+
+
+
+  function checkUserAssignment(taskId, username, callback) {
+    var checkurl = "{% url 'is_user_assigned' task_id=0 username='khali' %}";
+    var checkurl = checkurl.replace('0', taskId);
+    var checkurl = checkurl.replace('khali', username);
+    var result = false;
+    $.ajax({
+      url: checkurl,
+      method: "GET",
+      success: function (response) {
+        if (response.is_assigned) {
+          callback(true);
+
+        } else {
+          callback(false);
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error("خطا در بررسی عضویت کاربر:", error);
+      }
+    });
+  }
+
   var taskDetailsUrl = "{% url 'task_details_json' task_id=0 %}";
   function openTaskDetails(taskId) {
     var url = taskDetailsUrl.replace('0', taskId);
@@ -213,21 +265,49 @@
         var duedate = duedate.toLocaleDateString('fa-IR');
         var enddate = new Date(data.end_date);
         var enddate = enddate.toLocaleDateString('fa-IR');
+        var idtask = data.id;
         $("#taskid").text(data.id);
         $("#divtaskid").attr('value', data.id)
         $("#taskTitle").text(data.name);
-        $("#taskDescription").text(data.description);
+        if (data.description == null) {
+          $("#taskDescription").text("برای اضافه کردن توضیحات کلیک کنید...")
+          $("#taskDescription").attr("class", "text-secondary")
+        } else {
+          $("#taskDescription").text(data.description);
+        }
         $("#taskStartDate").text(startdate);
         $("#taskEndDate").text(enddate);
         $("#taskDueDate").text(duedate);
         $("#taskStatus").text(data.list_name);
-        const assignedUsersCheckboxes = $("#assignedUsersCheckboxes");
-        assignedUsersCheckboxes.empty();
-        $.each(data.team_members, function (index, user) {
-          var checked = data.assigned_users.includes(user.id) ? "checked" : ""; // اگر عضو مسئول است، چک باشد
-          var checkboxHtml = `<label><input type="checkbox" class="user-checkbox" data-user-id="${user.id}" ${checked}> ${user.username}</label><br>`;
-          assignedUsersCheckboxes.append(checkboxHtml);
+
+        var currentUrl = window.location.pathname;
+        var boardId = currentUrl.split('/')[3];
+        $.ajax({
+          url: "{% url 'team_members' board_id=0 %}".replace('0', boardId),
+          method: 'GET',
+          success: function (response) {
+            var assignedUsers = $("#assignedUsers");
+            assignedUsers.empty();
+            $.each(response.members, function (index, user) {
+              checkUserAssignment(idtask, user.username, function (isassigned) {
+                if (isassigned) {
+                  var userHtml = `<input type="checkbox" class="assign-user assignedcheckbox" data-user-id="${user.id}" data-task-id="${data.id}" }> ${user.username}<br>`;
+                  assignedUsers.append(userHtml);
+                  $(".assignedcheckbox").prop('checked',true);
+                } else {
+                  var userHtml = `<input type="checkbox" class="assign-user" data-user-id="${user.id}" data-task-id="${data.id}" }> ${user.username}<br>`;
+                  assignedUsers.append(userHtml);
+                }
+              });
+
+            });
+          },
+          error: function (xhr, status, error) {
+            console.error("Error fetching team members:", error);
+          }
         });
+
+
         $('#lightbox').show();
         $("#taskModal").show();
 

@@ -3,10 +3,22 @@ from rest_framework import serializers,viewsets
 from .models import Task,List
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
+from .models import Board
 
+class TeamMembersView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request, board_id):
+        try:
+            board = Board.objects.get(id=board_id)
+            team_members = board.team.members.all()
+            members_data = [{"id": member.id, "username": member.username} for member in team_members]
+            return Response({"members": members_data})
+        except Board.DoesNotExist:
+            return Response({"error": "Board not found"}, status=404)
 class ListSerializer(serializers.ModelSerializer):
     class Meta:
         model = List

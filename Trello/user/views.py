@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login,authenticate
 from .serializers import *
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
@@ -161,3 +163,23 @@ def update_task(request, task_id):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@csrf_exempt
+def assign_user(request):
+    if request.method == "POST":
+        task_id = request.POST.get("task_id")
+        user_id = request.POST.get("user_id")
+        is_assigned = request.POST.get("is_assigned") == "true"
+        task = get_object_or_404(Task, id=task_id)
+        user = get_object_or_404(User, id=user_id)
+        if is_assigned:
+            task.assigned_users.add(user)
+        else:
+            task.assigned_users.remove(user)
+        return JsonResponse({"message": "تغییرات با موفقیت انجام شد."}, status=200)
+    return JsonResponse({"error": "متد مجاز نیست."}, status=400)
+
+def is_user_assigned(request, task_id, username):
+    task = get_object_or_404(Task, id=task_id)
+    is_assigned = task.assigned_users.filter(username=username).exists()
+    return JsonResponse({"is_assigned": is_assigned})
