@@ -14,8 +14,8 @@ class SignUpForm(UserCreationForm):
         fields = ["username", "email", "password1", "password2"]
 
 class LoginForm(forms.Form):
-    username = forms.CharField(max_length=100, label='Username')
-    password = forms.CharField(widget=forms.PasswordInput, label='Password')
+    username = forms.CharField(max_length=100, label='',widget=forms.TextInput(attrs={'placeholder':'نام کاربری'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder':'گذرواژه'}), label='')
 
 class TeamForm(forms.ModelForm):
     class Meta:

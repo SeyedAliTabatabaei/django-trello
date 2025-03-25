@@ -8,25 +8,30 @@
     <div class="col-12 bg-light text-dark">
       <div class="modal-content text-center">
         <span class="close" onclick="$('#lightbox').hide(); $('#taskModal').hide();location.reload();">&times;</span>
-        <h3 id="taskTitle" onclick="makeEditable('taskTitle', 'name')"></h3>
+        <h3 id="taskTitle" style="cursor: pointer;" onclick="makeEditable('taskTitle', 'name')"></h3>
         <div id="divtaskid" class="d-none"></div>
-        <p><strong>توضیحات: </strong><span id="taskDescription"
+        <p><strong>توضیحات: </strong><span  style="cursor: pointer;" class="text-secondary"  id="taskDescription"
             onclick="makeEditable('taskDescription', 'description')"></p>
-        <p><strong>تاریخ شروع: </strong><span id="taskStartDate"
+        <p><strong>تاریخ شروع: </strong><span style="cursor: pointer;" class="text-secondary" id="taskStartDate"
             onclick="makeEditable('taskStartDate', 'start_date')"></span></p>
-        <p><strong>تاریخ پایان: </strong><span id="taskEndDate"
+        <p><strong>تاریخ پایان: </strong><span style="cursor: pointer;" class="text-secondary" id="taskEndDate"
             onclick="makeEditable('taskEndDate', 'end_date')"></span></p>
-        <p><strong>موعد تحویل: </strong><span id="taskDueDate" onclick="makeEditable('taskDueDate', 'due_date')"></span>
+        <p><strong>موعد تحویل: </strong><span style="cursor: pointer;" class="text-secondary" id="taskDueDate" onclick="makeEditable('taskDueDate', 'due_date')"></span>
         </p>
-        <p><strong>وضعیت: </strong><span id="taskStatus" onclick="makeEditable('taskStatus', 'status',)"></span></p>
+        <p><strong>وضعیت: </strong><span tyle="cursor: pointer;" class="text-secondary" id="taskStatus" onclick="makeEditable('taskStatus', 'status',)"></span></p>
         <p><strong>اعضای مسئول: </strong></p>
         <div id="assignedUsersCheckboxes">
 
         </div>
         <ul id="assignedUsers"></ul>
       </div>
+      <div class="text-secondary w-100 border text-center">
+        برای تغییر نام تسک و یا جزئیات تسک روی آنها کلیک کنید
+      </div>
+
     </div>
   </div>
+
 </div>
 <div class="container-fluid border">
   <div class="row justify-content-center">
@@ -51,9 +56,9 @@
                   <div class="container">
                     {% for task in list.tasks.all %}
                     <div class="row">
-
                       <div class="col-12">
                         <hr>
+                        <input type="checkbox" class="task-complete-checkbox" data-task-id="{{ task.id }}" {% if task.is_completed %} checked {% endif %}>
                         <div class="task-item w-100 btn btn-outline-secondary" id="{{ task.id }}"
                           href="javascript:void(0)" onclick="openTaskDetails({{ task.id }})">
                           {{ task.name }}
@@ -80,6 +85,13 @@
       </div>
     </div>
   </div>
+</div>
+
+<div class="text-center  text-secondary pt-3">
+  برای تغییر نام لیست ها روی آنها کلیک کنید
+</div>
+<div class="text-secondary pt-3 text-center">
+  برای انتقال تسک ها آنها را بکشید و رها کنید
 </div>
 <div class="container" style="margin-top: 3rem;">
   <div class="row justify-content-center">
@@ -293,7 +305,7 @@
                 if (isassigned) {
                   var userHtml = `<input type="checkbox" class="assign-user assignedcheckbox" data-user-id="${user.id}" data-task-id="${data.id}" }> ${user.username}<br>`;
                   assignedUsers.append(userHtml);
-                  $(".assignedcheckbox").prop('checked',true);
+                  $(".assignedcheckbox").prop('checked', true);
                 } else {
                   var userHtml = `<input type="checkbox" class="assign-user" data-user-id="${user.id}" data-task-id="${data.id}" }> ${user.username}<br>`;
                   assignedUsers.append(userHtml);
@@ -438,5 +450,23 @@
       }
     });
   }
+  $(document).on('change', '.task-complete-checkbox', function () {
+    var taskId = $(this).data('task-id');
+    var isChecked = $(this).prop('checked');
+    $.ajax({
+      url: "{% url 'update_task_complete' task_id=0 %}".replace('0', taskId),
+      method: 'PATCH',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        'is_completed': isChecked
+      }),
+      success: function (response) {
+        console.log('Task status updated successfully!');
+      },
+      error: function (xhr, status, error) {
+        console.error("Error updating task status:", error);
+      }
+    });
+  });
 </script>
 {% endblock %}

@@ -17,6 +17,7 @@ urlpatterns = [
     path('boards/<int:board_id>/team-members/', TeamMembersView.as_view(), name='team_members'),
     path("assign-user/", assign_user, name="assign_user"),
     path('task/<int:task_id>/is_assigned/<str:username>/', is_user_assigned, name='is_user_assigned'),
+    path('task/<int:task_id>/update_complete/', update_task_complete, name='update_task_complete'),
     path('task/<int:task_id>/details/',task_details_json, name='task_details_json'),
     path('task/<int:task_id>/move/', move_task_to_list, name='move_task_to_list'),
     path('tasks/<int:task_id>/update/', update_task, name='task_update'),

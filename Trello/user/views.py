@@ -1,3 +1,4 @@
+import json
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login,authenticate
 from .serializers import *
@@ -15,7 +16,7 @@ def register(request):
         if form.is_valid():
             user = form.save()
             login(request, user) 
-            return redirect("home") 
+            return redirect("dashboard") 
     else:
         form = SignUpForm()
     return render(request, "register.html", {"form": form})
@@ -30,7 +31,7 @@ def login_view(request):
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 login(request, user)
-                return redirect('home')
+                return redirect('dashboard')
             else:
                 form.add_error(None, 'Invalid username or password')
     else:
@@ -183,3 +184,12 @@ def is_user_assigned(request, task_id, username):
     task = get_object_or_404(Task, id=task_id)
     is_assigned = task.assigned_users.filter(username=username).exists()
     return JsonResponse({"is_assigned": is_assigned})
+@csrf_exempt
+def update_task_complete(request, task_id):
+    data = json.loads(request.body)
+    task = get_object_or_404(Task, id=task_id)
+    if request.method == "PATCH":
+        is_completed = data.get('is_completed')
+        task.is_completed = is_completed
+        task.save()
+        return JsonResponse({"message": "Task updated successfully", "is_completed": is_completed})
