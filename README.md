@@ -20,7 +20,7 @@ To get started with this project, follow these steps:
 
 1.Clone the repository:
   ```
-    git clone https://github.com/yourusername/django-trello.git](https://github.com/SeyedAliTabatabaei/django-trello.git
+    https://github.com/SeyedAliTabatabaei/django-trello.git
     cd django-trello-main/Trello
   ```
 
