@@ -193,3 +193,9 @@ def update_task_complete(request, task_id):
         task.is_completed = is_completed
         task.save()
         return JsonResponse({"message": "Task updated successfully", "is_completed": is_completed})
+    
+@login_required
+def completed_tasks_count(request):
+    user = request.user
+    completed_tasks = Task.objects.filter(assigned_users=user, is_completed=True).count()
+    return JsonResponse({"completed_tasks_count": completed_tasks})

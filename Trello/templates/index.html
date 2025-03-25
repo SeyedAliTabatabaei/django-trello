@@ -4,10 +4,24 @@
 <div class="container mt-3 border">
     <div class="row">
         <div class="col-12 text-center ">
-            To-Do task manager app by me
+            <p> تعداد تسک های انجام شده توسط شما: <strong id="completed-tasks">...</strong> </p>
         </div>
     </div>
-
 </div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
     
+        $.ajax({
+            url: "{% url 'completed_tasks_count' %}",
+            method: "GET",
+            success: function(response) {
+                $("#completed-tasks").text(response.completed_tasks_count);
+            },
+            error: function(xhr, status, error) {
+                console.error("خطا در دریافت تعداد تسک‌های انجام‌شده:", error);
+            }
+        });
+    });
+    </script>
 {% endblock %}
