@@ -52,7 +52,7 @@ def create_team(request):
             users = form.cleaned_data["members_usernames"]
             team.members.add(*users)
 
-            return redirect("home")  
+            return redirect("dashboard")  
 
     else:
         form = TeamForm()
