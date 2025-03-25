@@ -32,7 +32,11 @@ To get started with this project, follow these steps:
   ```
     docker-compose up -d
   ```
-3.Open your Browser and Go to the link below:
+3.Make Migrations:
+```
+  python manage.py migrate
+```
+4.Open your Browser and Go to the link below:
 ```
   http://localhost:8000
 ```
